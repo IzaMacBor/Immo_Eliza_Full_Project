@@ -153,6 +153,7 @@ class PropertyScraper:
         """
         cleaned_data = []
         
+        
         for link, raw_data in self.raw_data_dict['properties'].items():
             # Skip life annuity sales
             if raw_data.get("flags", {}).get("isLifeAnnuitySale", False):
@@ -164,10 +165,23 @@ class PropertyScraper:
                 'property_id': raw_data.get('id', 'null'),
                 'locality_name': raw_data.get('property', {}).get('location', {}).get('locality', 'null'),
                 'postal_code': raw_data.get('property', {}).get('location', {}).get('postalCode', 'null'),
+                'latitude': raw_data.get('property', {}).get('location', {}).get('latitude', 'null'),
+                'longitude': raw_data.get('property', {}).get('location', {}).get('longitude', 'null'),
                 'price': raw_data.get('price', {}).get('mainValue', 'null'),
                 'type_of_property': raw_data.get('property', {}).get('type', 'null'),
                 'subtype_of_property': raw_data.get('property', {}).get('subtype', 'null'),
+                'construction_year': (
+                    raw_data.get('property', {}).get('building', {}).get('constructionYear', 'null') 
+                    if raw_data and raw_data.get('property') and raw_data.get('property').get('building') 
+                    else 'null'
+                ),
                 'living_area': raw_data.get('property', {}).get('netHabitableSurface', 'null'),
+                'bedrooms': (
+                    raw_data.get('property', {}).get('bedroomCount', 'null') 
+                    if raw_data and raw_data.get('property') and isinstance(raw_data.get('property'), dict) 
+                else 'null'
+                ),
+                'nr_bathrooms': raw_data.get('property', {}).get('bathroomCount', 'null'),
                 'furnished': self._parse_boolean(raw_data.get('transaction', {}).get('sale', {}).get('isFurnished', None)),
                 'open_fire': 1 if raw_data.get('property', {}).get('fireplaceExists', False) else 0,
                 'terrace_surface': (
@@ -201,6 +215,7 @@ class PropertyScraper:
                 'type_of_sale': raw_data.get('transaction', {}).get('type', 'null')
             }
             
+
             cleaned_data.append(property_info)
         
         return cleaned_data    
